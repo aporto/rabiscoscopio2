@@ -47,13 +47,16 @@ MainWindow::MainWindow(QWidget *parent)
 	ui.edPeriod->setText("0.02");
 	ui.edFileLength->setText("10");	
 
-	filename = "C:\\git_hub\\aporto\\rabiscoscopio2.svn\\images\\garoa_logo.svg";
+	//filename = "C:\\git_hub\\aporto\\rabiscoscopio2.svn\\images\\garoa_logo.svg";
+	filename = "C:\\git_hub\\aporto\\rabiscoscopio2.svn\\no_image\\no.svg";
 
 	wave = new QSound("", this);
 	wave->setLoops(QSound::Infinite);
 
 	fileMonitor = new QFileSystemWatcher (this);
 	connect(fileMonitor, SIGNAL(fileChanged(QString)), this, SLOT(OnFileChanged(QString)));
+
+	zoom = 1;
 
 }
 
@@ -78,17 +81,82 @@ void MainWindow::OnLoadFile()
 	}
 }
 
-void MainWindow::DecodeLine(QString line, bool relative, TVecPoint & lastPoint)
+void MainWindow::DecodeLine(QString line, bool relative)
+{
+	points.clear();
+	int p = line.indexOf(" ");
+	bool first = true;
+	TVecPoint last = {0, 0};
+	while (line.size() > 0) {
+		//QString mline = line.SubString(1, p-1);
+		QString mline = line.left(p);
+		//mline = mline.right(mline.size()-1);
+		//line = line.Delete(1, mline.Length() + 1);
+		line = line.remove(0, mline.size() + 1);
+
+		int pv = mline.indexOf(",");
+
+		if (pv > 0) {
+			QString xs = mline.left(pv-1);
+			//QString ys = mline.SubString(pv+1, mline.Length());
+			QString ys = mline.right(mline.size()-pv-1);
+
+			TVecPoint point;
+			try {
+				point.x = xs.toDouble();
+				point.y = ys.toDouble();
+			} catch (...) {
+				point.x = 0;
+				point.y = 0;
+			}
+
+			if (relative) {
+				point.x += last.x;
+				point.y += last.y;
+			}
+			memcpy(&last, &point, sizeof(TVecPoint));
+
+			points.push_back(point);
+		} else {
+			if (mline == "z") {
+				points.push_back(points.at(0));
+			}
+
+			if (mline == "l") {
+				relative = true;
+			}
+
+			if (mline.toUpper() == mline) {
+				relative = false;
+			}
+		}
+
+		p = line.indexOf(" ");
+		if (p < 0) {
+			p = line.size();
+		}
+		first = false;
+	}
+}
+
+void MainWindow::DecodeLine2(QString line, bool relative, TVecPoint & lastPoint)
 {
 	//points.clear();
 	//line.remove(0,1);
 	bool isCurve = false;
+	/*if (line == "M471.96,628.1c0,14.09-11.423,25.512-25.513,25.512h-317.71   c-14.09,0-25.512-11.422-25.512-25.512V160.835c0-14.09,11.422-25.512,25.512-25.512h317.71c14.09,0,25.513,11.422,25.513,25.512   V628.1z") {
+		isCurve = true;
+	}*;*/
+	
+	if (line.contains("-8.7e-4")) {
+		isCurve = true;
+	}
 	int p = line.indexOf(" ");
 	bool first = true;
-	TVecPoint last = {0, 0};
+	//TVecPoint last = {0, 0};
 	QStringList list;
 	while (line.size() > 0) {
-		int p = line.indexOf(QRegExp("[a-zA-Z\\s:]"),1);
+		int p = line.indexOf(QRegExp("[a-dA-Df-z:F-Z\\s:]"), 1);//[a-zA-Z\\s:]"),1);
 		if (p >= 0) {
 			QString mline = line;
 			mline.remove(p, mline.size());
@@ -99,28 +167,78 @@ void MainWindow::DecodeLine(QString line, bool relative, TVecPoint & lastPoint)
 			break;
 		}
 	}
+
+	//QString xx = list[199];
+	//QString xx1 = list[200];
 	//str = "Some  text\n\twith  strange whitespace.";
 	//list = line.split(QRegExp("[a-zA-Z\\s:]"));
 	for (int i = 0; i < list.size(); i++) {
 		//TVecPoint point = DecodePoint(mline);
 		QString mline = list[i].trimmed();
+		int k=1; 
+		while (k < mline.size()) {
+			if (mline.at(k)== '-') {				
+				if (mline.at(k-1) != ',') {
+					mline.insert(k, ",");
+					k++;
+				}
+			}
+			k++;
+		}
 		if (mline == "") {
 			continue;
 		}
 
 		QString type = mline.left(1);
-		QString utype = mline.left(1).toUpper();
-		relative = (utype != type);
-		mline = mline.right(mline.size()-1);
-		if (mline == "-14.09,0-25.512-11.422-25.512-25.512") {
-			relative = true;
+		QString utype = mline.left(1).toUpper();		
+		if ((type.at(0)=='-') || ((type.at(0) >= '0') && (type.at(0) <= '9'))) {
+			if (relative) {
+				type = "l";
+			} else {
+				type = "L";
+			}
+			utype = "L";
+		} else {
+			mline = mline.right(mline.size()-1);
 		}
+		relative = (utype != type);
+
+		if (mline.trimmed()== "") {
+			if (i < list.size()-1) {
+				list[i+1] = type + list[i+1].trimmed();
+				continue;
+			}
+		}
+		/*if (mline == "-14.09,0-25.512-11.422-25.512-25.512") {
+			relative = true;
+		}*/
 		if (utype == "Z") {			
 			points.push_back(points.at(0));
 		} else {
-			QStringList mlist1 = mline.split(QRegExp(","),QString::SkipEmptyParts);
-			QStringList mlist;
-			for (int j = 0; j < mlist1.size(); j++) {
+			//QStringList mlist1 = mline.split(QRegExp(","),QString::SkipEmptyParts);
+			QStringList mlist = mline.split(",",QString::SkipEmptyParts);
+			/*while (mline.size() > 0) {
+				int p1 = mline.indexOf(",");
+				int p2 = mline.indexOf("-",1);
+				if (p1 >= 0) {
+					if (p1 > p2) {
+						if (p2 >= 0) {
+							p1 = p2;
+						}
+					}
+				} else {
+					p1 = p2;
+				}
+				if (p1 > 0) {
+					QString numb = mline.left(p1);
+					mline.remove(0, p1+1);
+					mlist.append(numb);
+				} else {
+					mlist.append(mline);
+					mline = "";					
+				}				
+			}*/
+			/*for (int j = 0; j < mlist1.size(); j++) {
 				QString numb = mlist1[j];
 				int pp = numb.indexOf("-");
 				while (pp > 0) {
@@ -133,7 +251,7 @@ void MainWindow::DecodeLine(QString line, bool relative, TVecPoint & lastPoint)
 				if (numb.size() > 0) { 
 					mlist.append(numb);
 				}
-			}
+			}*/
 			TVecPoint point;
 			QString xs = "";
 			QString ys = "";
@@ -177,8 +295,8 @@ void MainWindow::DecodeLine(QString line, bool relative, TVecPoint & lastPoint)
 			}
 
 			if (relative) {
-				point.x += last.x;
-				point.y += last.y;
+				//point.x += lastPoint.x;
+				//point.y += lastPoint.y;
 			}
 			memcpy(&lastPoint, &point, sizeof(TVecPoint));
 
@@ -349,11 +467,13 @@ void MainWindow::BreakAxis()
 	for (int i = 0; i < psize; i++) {
 		double delta;
 		if (points.at(i).x > points.at(i+1).x) {
-			delta = abs(points.at(i).x - points.at(i+1).x);
-		//} else {
-//			delta = points.at(i+1).x - points.at(i).x;
+			delta = points.at(i).x - points.at(i+1).x;
+		} else {
+			delta = points.at(i+1).x - points.at(i).x;
 		}
-		delta = distance(points.at(i), points.at(i+1));
+		if (ui.cbUseOnlyXComponents-> isChecked() == false) {
+			delta = distance(points.at(i), points.at(i+1));
+		}
 		totalx += delta;
 	}
 
@@ -364,10 +484,12 @@ void MainWindow::BreakAxis()
 		double delta;
 		if (points.at(i).x > points.at(i+1).x) {
 			delta = abs(points.at(i).x - points.at(i+1).x);
-		//} else {
-//			delta = points.at(i+1).y - points.at(i).y;
+		} else {
+			delta = points.at(i+1).x - points.at(i).x;
 		}
-		delta = distance(points.at(i), points.at(i+1));
+		if (ui.cbUseOnlyXComponents-> isChecked() == false) {
+			delta = distance(points.at(i), points.at(i+1));
+		}
 		double time = (delta/totalx) * duration;
 		time = time + times.at(i);
 		times.push_back(time);
@@ -453,7 +575,7 @@ void MainWindow::OnRefresh()
 		QMessageBox::information(0, "error", file.errorString());
 	}
 
-	QTextStream in(&file);
+	/*QTextStream in(&file);
 
 	QString line;
 
@@ -529,6 +651,61 @@ void MainWindow::OnRefresh()
 		}
 	}
 
+	*/
+	QStringList list;
+	QTextStream in(&file);	
+	while(!in.atEnd()) {
+		QString line = in.readLine();
+		list.append(line);
+	}
+	file.close();
+
+	QString line;
+	do {
+		line = list[0];
+		list.removeAt(0);
+	} while ((list.size() > 0) && (line.indexOf("<path") < 0));
+
+	if (list.size() < 1) {
+		QMessageBox::information(0, "error", "Could not find start of path on SVG file");
+		return;
+	}
+
+	line = list[0];
+	line = line.toLower();
+	bool relative = true;
+	int p = line.indexOf("d=\"m ");
+	if (p < 0) {
+		p = line.indexOf("d=\"M ");
+		relative = false;
+	}
+	while (p < 0)  {
+		list.removeAt(0);
+		line = list[0];
+		p = line.indexOf("d=\"m ");
+		relative = true;
+		if (p < 0) {
+			p = line.indexOf("d=\"M ");
+			relative = false;
+		}
+	}
+
+	if (p >= 0) {
+		line = line.remove(0, p + 4);
+		while (line.at(0) == " ") {
+			line = line.right(line.size()-1);
+		}
+	}
+
+	if (line.indexOf("\"") < 0) {
+		QMessageBox::information(0, "error", "Could not find end of path on SVG file");
+		return;
+	}
+
+	line = line.remove(line.indexOf("\""), line.size());
+
+	DecodeLine(line, relative);
+
 	duration = ui.edPeriod->text().toDouble();
 	if ((duration < 0.0001) || (duration > 100)) {
 		duration = 0.02;
@@ -540,11 +717,11 @@ void MainWindow::OnRefresh()
 		ui.edFileLength->setText("10");	
 	}
 
+	zoom = double(ui.sbZoom->value()) / 100.0;
+	
 	xCompensate = ui.sbCompensateX->value();
 	yCompensate = ui.sbCompensateY->value();
 
-
-	
 	NormalizePoints();
 	BreakAxis();
 
@@ -606,8 +783,8 @@ void MainWindow::WriteWaveFile()
 			double vy = axis_y.at(i);
 			double vx = axis_x.at(i);
 			short sample[2];
-			sample[0] = (short) (vy / 100 * 32767);
-			sample[1] = (short) (vx / 100 * 32767);
+			sample[0] = (short) (zoom * vy / 50 * 32767);
+			sample[1] = (short) (zoom * vx / 50 * 32767);
 			file.write((char *)sample, 4);
 			numSamples ++;
 			dataSize += 4;

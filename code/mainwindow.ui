@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>681</width>
-    <height>423</height>
+    <width>1022</width>
+    <height>611</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,20 +15,20 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout"/>
-    </item>
-    <item row="2" column="0">
+    <item row="3" column="0">
      <widget class="QProgressBar" name="progress">
       <property name="value">
        <number>24</number>
       </property>
      </widget>
     </item>
+    <item row="2" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout"/>
+    </item>
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
-       <number>0</number>
+       <number>7</number>
       </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -146,6 +146,31 @@
        </layout>
       </item>
       <item>
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Zoom</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QSpinBox" name="sbZoom">
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>50</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <property name="spacing">
          <number>0</number>
@@ -226,7 +251,18 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_5"/>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QCheckBox" name="cbUseOnlyXComponents">
+          <property name="text">
+           <string>Use only X components to calculate distances</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <spacer name="horizontalSpacer">

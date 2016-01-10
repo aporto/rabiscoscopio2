@@ -72,6 +72,7 @@ private:
 	double duration;
 	int fileLength;
 	double xCompensate, yCompensate;
+	double zoom;
 
 	QString filename;
 	QString wavefile;
@@ -79,7 +80,8 @@ private:
 	QSound * wave;
 	
 	QFileSystemWatcher * fileMonitor;
-	void DecodeLine(QString line, bool relative, TVecPoint & lastPoint);
+	void DecodeLine2(QString line, bool relative, TVecPoint & lastPoint);
+	void DecodeLine(QString line, bool relative);
 	void NormalizePoints();
 	void BreakAxis();
 	void WriteWaveFile();

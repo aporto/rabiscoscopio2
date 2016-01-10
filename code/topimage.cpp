@@ -34,8 +34,7 @@ void TopImage::paintEvent(QPaintEvent *)
 	painter.drawLine(QLine(0, h/2, w, h/2));
 	painter.drawLine(QLine(w/2, 0, w/2, h));
 
-	painter.setPen(Qt::green);
-	painter.setBrush(Qt::NoBrush);
+	
 	
 	double x, y;
 	if (points.size() > 0) {
@@ -43,6 +42,9 @@ void TopImage::paintEvent(QPaintEvent *)
 		x = x * w/100 + w/2;
 		y = points.at(0).y;
 		y = y * h/100 + h/2;
+		double x1 = x;
+		double y1 = y;
+				
 
 		QPainterPath path;
 		path.moveTo(x, y);
@@ -54,7 +56,17 @@ void TopImage::paintEvent(QPaintEvent *)
 			y = y * h/100 + h/2;
 			path.lineTo(x, y);
 		}
+
+		painter.setPen(Qt::NoPen);
+		painter.setBrush(Qt::red);
+		painter.drawEllipse(x1,y1,11,11);
+		painter.setPen(Qt::green);
+		painter.setBrush(Qt::NoBrush);
+
 		painter.drawPath(path);
+		painter.setPen(Qt::NoPen);
+		painter.setBrush(Qt::blue);
+		painter.drawEllipse(x,y,7,7);
 	}
 }
 
