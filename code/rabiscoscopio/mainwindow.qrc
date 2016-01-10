@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/MainWindow">
+        <file>Resources/info_32.png</file>
+        <file>Resources/load_32.png</file>
+        <file>Resources/refresh_32.png</file>
+        <file>Resources/sound_off_32.png</file>
+        <file>Resources/sound_on_32.png</file>
+    </qresource>
+</RCC>
