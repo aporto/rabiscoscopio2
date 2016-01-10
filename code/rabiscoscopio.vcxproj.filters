@@ -68,15 +68,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_bottomimage.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="about.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_about.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_about.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="aboutwin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -112,12 +103,6 @@
     <CustomBuild Include="bottomimage.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="about.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="about.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="aboutwin.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -140,9 +125,6 @@
     </ClInclude>
     <ClInclude Include="definitions.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_about.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_aboutwin.h">
       <Filter>Generated Files</Filter>
