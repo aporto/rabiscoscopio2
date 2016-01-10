@@ -35,6 +35,7 @@ void TopImage::paintEvent(QPaintEvent *)
 	painter.drawLine(QLine(w/2, 0, w/2, h));
 
 	painter.setPen(Qt::green);
+	painter.setBrush(Qt::NoBrush);
 	
 	double x, y;
 	if (points.size() > 0) {

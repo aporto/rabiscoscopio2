@@ -68,9 +68,10 @@ private:
 	TopImage * topImage;
 	BottomImage * bottomImage;
 	
-	float sampleRate;
+	double sampleRate;
 	double duration;
 	int fileLength;
+	double xCompensate, yCompensate;
 
 	QString filename;
 	QString wavefile;
@@ -78,10 +79,11 @@ private:
 	QSound * wave;
 	
 	QFileSystemWatcher * fileMonitor;
-	void DecodeLine(QString line, bool relative);
+	void DecodeLine(QString line, bool relative, TVecPoint & lastPoint);
 	void NormalizePoints();
 	void BreakAxis();
 	void WriteWaveFile();
+	double distance(TVecPoint p1, TVecPoint p2);
 
 };
 

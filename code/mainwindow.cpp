@@ -44,7 +44,10 @@ MainWindow::MainWindow(QWidget *parent)
 	duration = 0.02;
 	fileLength = 1;
 
-	filename = "C:\\git_hub\\aporto\\rabiscoscopio2\\images\\star1.svg";
+	ui.edPeriod->setText("0.02");
+	ui.edFileLength->setText("10");	
+
+	filename = "C:\\git_hub\\aporto\\rabiscoscopio2.svn\\images\\garoa_logo.svg";
 
 	wave = new QSound("", this);
 	wave->setLoops(QSound::Infinite);
@@ -61,42 +64,158 @@ MainWindow::~MainWindow()
 
 void MainWindow::OnLoadFile()	
 {
-	QString oldFileName = filename;
-	//QString fileName = QFileDialog::getOpenFileName(this,	tr("Open Image"), "", tr("SVG Image Files (*.svg)"));
+	//QString oldFileName = filename;
+	QString newfilename = QFileDialog::getOpenFileName(this,	tr("Open Image"), "", tr("SVG Image Files (*.svg)"));
 	
 	//QString fileName = "C:\\alex\\projetos\\github\\aporto\\rabiscoscopio2\\images\\garoa_logo.svg";
-	filename = "C:/git_hub/aporto/rabiscoscopio2/images/star1.svg";
+	//filename = "C:/git_hub/aporto/rabiscoscopio2/images/triangle.svg";
 
-	bool b = fileMonitor->removePath(oldFileName);
-	b = fileMonitor->addPath(filename);
-
-	OnRefresh();	
+	if (QFileInfo(newfilename).exists() &&  QFileInfo(newfilename).isFile()) {	
+		bool b = fileMonitor->removePath(filename);
+		filename = newfilename;
+		b = fileMonitor->addPath(filename);
+		OnRefresh();	
+	}
 }
 
-void MainWindow::DecodeLine(QString line, bool relative)
+void MainWindow::DecodeLine(QString line, bool relative, TVecPoint & lastPoint)
 {
-	points.clear();
-	line.remove(0,1);
+	//points.clear();
+	//line.remove(0,1);
+	bool isCurve = false;
 	int p = line.indexOf(" ");
 	bool first = true;
 	TVecPoint last = {0, 0};
+	QStringList list;
 	while (line.size() > 0) {
+		int p = line.indexOf(QRegExp("[a-zA-Z\\s:]"),1);
+		if (p >= 0) {
+			QString mline = line;
+			mline.remove(p, mline.size());
+			list.append(mline);
+			line.remove(0,p);
+		} else {
+			list.append(line);
+			break;
+		}
+	}
+	//str = "Some  text\n\twith  strange whitespace.";
+	//list = line.split(QRegExp("[a-zA-Z\\s:]"));
+	for (int i = 0; i < list.size(); i++) {
+		//TVecPoint point = DecodePoint(mline);
+		QString mline = list[i].trimmed();
+		if (mline == "") {
+			continue;
+		}
+
+		QString type = mline.left(1);
+		QString utype = mline.left(1).toUpper();
+		relative = (utype != type);
+		mline = mline.right(mline.size()-1);
+		if (mline == "-14.09,0-25.512-11.422-25.512-25.512") {
+			relative = true;
+		}
+		if (utype == "Z") {			
+			points.push_back(points.at(0));
+		} else {
+			QStringList mlist1 = mline.split(QRegExp(","),QString::SkipEmptyParts);
+			QStringList mlist;
+			for (int j = 0; j < mlist1.size(); j++) {
+				QString numb = mlist1[j];
+				int pp = numb.indexOf("-");
+				while (pp > 0) {
+					QString numb1 = numb.left(pp);
+					numb = numb.right(numb.size() - pp);
+					mlist.append(numb1);
+					pp = numb.indexOf("-");
+					//mlist.append(numb2);
+				} //else {
+				if (numb.size() > 0) { 
+					mlist.append(numb);
+				}
+			}
+			TVecPoint point;
+			QString xs = "";
+			QString ys = "";
+			if ((utype == " ") || (utype == "L")) {
+				xs = mlist[0];
+				ys = mlist[1];
+				//point.x = xs.toDouble();
+				//point.y = ys.toDouble();
+			}
+			if (utype == "M") {
+				xs = mlist[0];
+				ys = mlist[1];
+				//point.x = xs.toDouble();
+				//point.y = ys.toDouble();
+			}
+			if (utype == "C") {
+				if (mlist.size() < 6) {
+					xs = "";
+				} else {
+					xs = mlist[4];
+					ys = mlist[5];
+				}
+				//point.x = xs.toDouble();
+				//point.y = ys.toDouble();
+			}
+			if (utype == "H") {
+				xs = mlist[0];
+				ys = QString::number(lastPoint.y);			
+			}
+			if (utype == "V") {
+				ys = mlist[0];
+				xs = QString::number(lastPoint.x);			
+			}
+		
+			try {
+				point.x = xs.toDouble();
+				point.y = ys.toDouble();
+			} catch (...) {
+				point.x = 0;
+				point.y = 0;
+			}
+
+			if (relative) {
+				point.x += last.x;
+				point.y += last.y;
+			}
+			memcpy(&lastPoint, &point, sizeof(TVecPoint));
+
+			points.push_back(point);
+		}	
+		
+	}
+}
+
+/*
+		
+		
+
+	//while (line.size() > 0) {
 		//QString mline = line.SubString(1, p-1);
-		QString mline = line.left(p);
+		//]//int p = 
+		//QString mline = line.left(p);
 		line = line.remove(0, mline.size() + 1);
 
+		QString xs ="";
+		QString ys ="";
 		int pv = mline.indexOf(",");
-		int pe = mline.indexOf(" ");
-
-		if (pv >= 0) {
-			if (pe < pv) {
-				pe = mline.size();
+		if (isCurve) {
+		} else {			
+			int pe = mline.indexOf(" ");
+			if (pv >= 0) {
+				if (pe < pv) {
+					pe = mline.size();
+				}
+				xs = mline.left(pv);
+				ys = mline.left(pe);
+				ys = ys.right(ys.size() - pv - 1);		
 			}
-			QString xs = mline.left(pv);
-			QString ys = mline.left(pe);
-			ys = ys.right(ys.size() - pv - 1);		
-
+		}
+	
 			//mline.remove(0, p
+		if (pv >= 0) {
 
 			TVecPoint point;
 			try {
@@ -124,7 +243,17 @@ void MainWindow::DecodeLine(QString line, bool relative)
 			}
 
 			if (mline == "L") {
+				relative = false;
+			}
+
+			if (mline == "c") {
+				isCurve = true;
 				relative = true;
+			}
+
+			if (mline == "L") {
+				isCurve = true;
+				relative = false;
 			}
 
 			if (mline.toUpper() == mline) {
@@ -141,7 +270,7 @@ void MainWindow::DecodeLine(QString line, bool relative)
 }
 
 
-
+*/
 void MainWindow::NormalizePoints()
 {
 	double minx = 10000000;
@@ -168,16 +297,45 @@ void MainWindow::NormalizePoints()
 	double h = maxy - miny;
 	double zerox = w / 2;
 	double zeroy = h / 2;
+	double ratio = h / w;
 
 	for (unsigned int i = 0; i < points.size(); i++) {
 		double x = points.at(i).x;
 		double y = points.at(i).y;
 		x = (x - minx) * 80 / w - 50 + 10;
-		y = (y - miny) * 80 / h - 50 + 10;
+		y = ((y - miny) * 80 / h - 50 + 10) * ratio;
+
+		/*if (i > 0) {
+			x = x * (1 + (i * xCompensate));
+			y = y * (1 + (i * yCompensate));
+		}*/
+
+		if (i > 0) {
+			double x1 = points.at(i-1).x;
+			double y1 = points.at(i-1).y;
+			if (abs(x-x1) < w/200) {
+				x = x * xCompensate;
+			}
+			if (abs(y-y1) < h/200) {
+				y = y * yCompensate;
+			}
+		}
 		points.at(i).x = x;
 		points.at(i).y = y;
 	}
 }
+
+
+
+double MainWindow::distance(TVecPoint p1, TVecPoint p2)
+{
+	double deltax = abs(p1.x - p2.x);
+	double deltay = abs(p1.y - p2.y);
+
+	double dist = sqrt(deltax * deltax + deltay * deltay);
+	return dist;
+}
+
 
 void MainWindow::BreakAxis()
 {
@@ -191,10 +349,11 @@ void MainWindow::BreakAxis()
 	for (int i = 0; i < psize; i++) {
 		double delta;
 		if (points.at(i).x > points.at(i+1).x) {
-			delta = points.at(i).x - points.at(i+1).x;
-		} else {
-			delta = points.at(i+1).x - points.at(i).x;
+			delta = abs(points.at(i).x - points.at(i+1).x);
+		//} else {
+//			delta = points.at(i+1).x - points.at(i).x;
 		}
+		delta = distance(points.at(i), points.at(i+1));
 		totalx += delta;
 	}
 
@@ -204,17 +363,19 @@ void MainWindow::BreakAxis()
 	for (int i = 0; i < psize; i++) {
 		double delta;
 		if (points.at(i).x > points.at(i+1).x) {
-			delta = points.at(i).x - points.at(i+1).x;
-		} else {
-			delta = points.at(i+1).x - points.at(i).x;
+			delta = abs(points.at(i).x - points.at(i+1).x);
+		//} else {
+//			delta = points.at(i+1).y - points.at(i).y;
 		}
-		double time = (delta/totalx) * duration + times.at(i);
+		delta = distance(points.at(i), points.at(i+1));
+		double time = (delta/totalx) * duration;
+		time = time + times.at(i);
 		times.push_back(time);
 	}
 
 	unsigned int numberOfPoints = sampleRate * duration;
 	int idx = 0;
-	double timeStep = 1.0 / sampleRate;
+	double timeStep = double(1.0) / sampleRate;
 	double time = 0.0;
 	double grad = 0.0;
 	double x1 = points.at(idx).x;
@@ -225,6 +386,7 @@ void MainWindow::BreakAxis()
 	double lim_sup = times.at(idx+1);
 	double x, y;
 	int k = times.size();
+	vector <int>pp;
 	for (unsigned int i = 0; i < numberOfPoints; i++) {
 		if (abs(lim_sup - lim_inf) < 0.00001) {
 			grad = 0;
@@ -243,14 +405,16 @@ void MainWindow::BreakAxis()
 		} else {
 			x = x1;
 		}
+		//x = x + i * 0.01;
 		//double x = points.at(idx + 1).x + grad * (points.at(idx + 1).x - points.at(i).x);
 
 		axis_x.push_back(x);
 		//axis_y.push_back(-(y));
 		axis_y.push_back(-y);
-
+		
 		time = time + timeStep;
-		if (time > lim_sup) {
+		if (time >= lim_sup) {
+			pp.push_back(i);			
 			idx++;
 			if (idx >= psize) {
 				if (i < numberOfPoints - 10) {
@@ -315,44 +479,72 @@ void MainWindow::OnRefresh()
 
 	file.close();
 
-	int pos1 = line.indexOf("d=\"M");
-	int pos2 = line.indexOf("d=\"m");
+	points.clear();
+	TVecPoint lastPoint = {0, 0};
 
-	if ((pos1 == -1) && (pos2 == -1)) {
-		QMessageBox::information(0, "error", "Could not find single path on SVG file");
-		return;
-	}
+	while (line.size() > 0) {
+		int pos1 = line.indexOf("d=\"M");
+		int pos2 = line.indexOf("d=\"m");
 
-	bool relative;
-	if (pos1 < pos2) {
-		if (pos1 > -1) {
-			line.remove(0, pos1);
-			relative = false;
-		} else {
-			line.remove(0, pos2);
-			relative = true;
+		if ((pos1 == -1) && (pos2 == -1)) {
+			QMessageBox::information(0, "error", "Could not find single path on SVG file");
+			return;
 		}
-	} else {
-		if (pos2 > -1) {
-			line.remove(0, pos2);
-			relative = true;
+		bool relative;
+		if (pos1 < pos2) {
+			if (pos1 > -1) {
+				line.remove(0, pos1);
+				relative = false;
+			} else {
+				line.remove(0, pos2);
+				relative = true;
+			}
 		} else {
-			line.remove(0, pos1);
-			relative = false;
+			if (pos2 > -1) {
+				line.remove(0, pos2);
+				relative = true;
+			} else {
+				line.remove(0, pos1);
+				relative = false;
+			}
+		}
+
+		line.remove(0, 3);
+
+		pos1 = line.indexOf("\"");
+		if (pos1 < 0) {
+			QMessageBox::information(0, "error", "Could not find end of path on SVG file");
+			return;
+		}
+
+		QString subline = line;
+		subline.remove(pos1, line.size());
+		line.remove(0, pos1);		
+		DecodeLine(subline, relative, lastPoint);
+		pos1 = line.indexOf("<path");
+		if (pos1 >= 0) {
+			line.remove(0, pos1 + 5);
+		} else {
+			break;
 		}
 	}
 
-	line.remove(0, 4);
-
-	pos1 = line.indexOf("\"");
-	if (pos1 < 0) {
-		QMessageBox::information(0, "error", "Could not find end of path on SVG file");
-		return;
+	duration = ui.edPeriod->text().toDouble();
+	if ((duration < 0.0001) || (duration > 100)) {
+		duration = 0.02;
+		ui.edPeriod->setText("0.02");		
+	}
+	fileLength = ui.edFileLength->text().toDouble();
+	if ((fileLength < 0.0001) || (fileLength > 10000)) {
+		fileLength = 10;
+		ui.edFileLength->setText("10");	
 	}
 
-	line.remove(pos1, line.size());
+	xCompensate = ui.sbCompensateX->value();
+	yCompensate = ui.sbCompensateY->value();
 
-	DecodeLine(line, relative);
+
+	
 	NormalizePoints();
 	BreakAxis();
 
