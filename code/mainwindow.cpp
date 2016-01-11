@@ -432,10 +432,10 @@ void MainWindow::NormalizePoints()
 			double x1 = points.at(i-1).x;
 			double y1 = points.at(i-1).y;
 			if (abs(x-x1) < w/200) {
-				x = x * xCompensate;
+				//x = x * xCompensate;
 			}
 			if (abs(y-y1) < h/200) {
-				y = y * yCompensate;
+				//y = y * yCompensate;
 			}
 		}
 		points.at(i).x = x;
@@ -783,8 +783,8 @@ void MainWindow::WriteWaveFile()
 			double vy = axis_y.at(i);
 			double vx = axis_x.at(i);
 			short sample[2];
-			sample[0] = (short) (zoom * vy / 50 * 32767);
-			sample[1] = (short) (zoom * vx / 50 * 32767);
+			sample[0] = (short) (zoom * vy / 50.0 * 32767.0);
+			sample[1] = (short) (zoom * vx / 50.0 * 32767.0  + xCompensate * 32767.0);
 			file.write((char *)sample, 4);
 			numSamples ++;
 			dataSize += 4;
