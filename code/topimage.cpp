@@ -14,10 +14,10 @@ TopImage::~TopImage()
 
 void TopImage::paintEvent(QPaintEvent *)
 {
-     QPainter painter(this);
-     //painter.setPen(Qt::blue);
-     //painter.setFont(QFont("Arial", 30));
-     //painter.drawText(rect(), Qt::AlignCenter, "Qt");
+	 QPainter painter(this);
+	 //painter.setPen(Qt::blue);
+	 //painter.setFont(QFont("Arial", 30));
+	 //painter.drawText(rect(), Qt::AlignCenter, "Qt");
 	
 	double w = width();
 	double h = height();
@@ -39,21 +39,20 @@ void TopImage::paintEvent(QPaintEvent *)
 	double x, y;
 	if (points.size() > 0) {
 		x = points.at(0).x;
-		x = x * w/100 + w/2;
+		x = x * w/2 + w/2;
 		y = points.at(0).y;
-		y = y * h/100 + h/2;
+		y = y * h/2 + h/2;
 		double x1 = x;
-		double y1 = y;
-				
+		double y1 = y;				
 
 		QPainterPath path;
 		path.moveTo(x, y);
 		//painter.moveTo(x, y);
 		for (unsigned int i = 1; i < points.size(); i++) {
 			x = points.at(i).x;
-			x = x * w/100 + w/2;
+			x = x * w/2 + w/2;
 			y = points.at(i).y;
-			y = y * h/100 + h/2;
+			y = y * h/2 + h/2;
 			path.lineTo(x, y);
 		}
 

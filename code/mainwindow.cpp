@@ -420,8 +420,11 @@ void MainWindow::NormalizePoints()
 	for (unsigned int i = 0; i < points.size(); i++) {
 		double x = points.at(i).x;
 		double y = points.at(i).y;
-		x = (x - minx) * 80 / w - 50 + 10;
-		y = ((y - miny) * 80 / h - 50 + 10) * ratio;
+		//x = (x - minx) * 80 / w - 50 + 10;
+		//y = ((y - miny) * 80 / h - 50 + 10) * ratio;
+
+		x = (x - minx)  / w - 0.5;
+		y = ((y - miny) / h ) * ratio - 0.5;
 
 		/*if (i > 0) {
 			x = x * (1 + (i * xCompensate));
@@ -778,13 +781,19 @@ void MainWindow::WriteWaveFile()
 	int cycles = fileLength / duration;
 	int pTotal = cycles * total;
 	int prog = 0;
+
+	double centerX = 0.5 - double(ui.centerX->value()) / 100.0;
+	double centerY = 0.5 - double(ui.centerY->value()) / 100.0;
 	for (int j = 0; j < cycles; j++) {
 		for (int i = 0; i < total; i++) {
 			double vy = axis_y.at(i);
 			double vx = axis_x.at(i);
 			short sample[2];
-			sample[0] = (short) (zoom * vy / 50.0 * 32767.0);
-			sample[1] = (short) (zoom * vx / 50.0 * 32767.0  + xCompensate * 32767.0);
+			//sample[0] = (short) (zoom * vy / 50.0 * 32767.0);
+			//sample[1] = (short) (zoom * vx / 50.0 * 32767.0  + 0 * 32767.0);
+
+			sample[0] = (short) (zoom * (vy) * 32767.0) + centerY * 100;
+			sample[1] = (short) (zoom * (vx - centerX) * (32767.0));
 			file.write((char *)sample, 4);
 			numSamples ++;
 			dataSize += 4;

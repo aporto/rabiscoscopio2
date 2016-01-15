@@ -46,7 +46,8 @@ void BottomImage::paintEvent(QPaintEvent *)
 		path.moveTo(x, y);
 		for (unsigned int i = 1; i < axis_y.size(); i++) {
 			y = axis_y.at(i);
-			y = h - (y * h/200 + h/2);
+			y = h - (y * h/2 + h/2);
+			//y = h - (y * h/200 + h/2);
 			x = i * w / axis_y.size();
 			path.lineTo(x, y);
 		}
@@ -66,7 +67,8 @@ void BottomImage::paintEvent(QPaintEvent *)
 		path.moveTo(x, y);
 		for (unsigned int i = 1; i < axis_x.size(); i++) {
 			y = axis_x.at(i);
-			y = h - (y * h/200 + h/2);
+			//y = h - (y * h/200 + h/2);
+			y = h - (y * h/2 + h/2);
 			x = i * w / axis_x.size();
 			path.lineTo(x, y);
 		}
