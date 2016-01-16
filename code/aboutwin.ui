@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>487</width>
-    <height>510</height>
+    <width>473</width>
+    <height>419</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,6 +47,11 @@
      <height>16</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Rabiscoscopio 2.0</string>
    </property>
@@ -60,6 +65,11 @@
      <height>16</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Author: Alex Porto</string>
    </property>
@@ -69,27 +79,19 @@
     <rect>
      <x>20</x>
      <y>80</y>
-     <width>241</width>
-     <height>16</height>
+     <width>311</width>
+     <height>21</height>
     </rect>
    </property>
-   <property name="text">
-    <string>More info at: www.alexporto.com</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_5">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>420</y>
-     <width>441</width>
-     <height>91</height>
-    </rect>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Special thanks to these guys from The Noun Project (Toolbar icons)&lt;br/&gt;Pham Thi Dieu Lin&lt;br/&gt;Nate Eul&lt;br/&gt;Tahsin Tahil&lt;br/&gt;Jevgeni Striganov&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>More info at: &lt;a href=&quot;http://alexporto.com/blog/oscilloscope-drawing-everyone&quot;&gt;www.alexporto.com&lt;/a&gt;</string>
    </property>
-   <property name="wordWrap">
+   <property name="openExternalLinks">
     <bool>true</bool>
    </property>
   </widget>

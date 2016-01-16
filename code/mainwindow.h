@@ -59,6 +59,7 @@ public slots:
 	void OnRefresh();
 	void OnAutoPlayClick();
 	void OnAboutClick();
+	void OncbUseOnlyXComponents(int state);
 	
 	void OnFileChanged(const QString &path);
 	//void OnDirectoryChanged(const QString & path)

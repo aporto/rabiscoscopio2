@@ -11,8 +11,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 	QSplitter *splitter = new QSplitter(Qt::Vertical);
 	ui.verticalLayout->addWidget(splitter);
-	splitter->show();
-	//splitter->
 	topImage  = new TopImage();
 	bottomImage  = new BottomImage();	
 	//QTextEdit *textedit = new QTextEdit;
@@ -37,8 +35,11 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui.actionAutoPlay, SIGNAL(triggered()), this, SLOT(OnAutoPlayClick()));
 	connect(ui.actionAbout, SIGNAL(triggered()), this, SLOT(OnAboutClick()));
 
-	ui.progress->hide();	
-
+	connect(ui.sbZoom, SIGNAL(sliderReleased()), this, SLOT(OnRefresh()));
+	connect(ui.edFileLength, SIGNAL(editingFinished()), this, SLOT(OnRefresh()));
+	connect(ui.edPeriod, SIGNAL(editingFinished()), this, SLOT(OnRefresh()));
+	connect(ui.cbUseOnlyXComponents, SIGNAL(stateChanged(int)), this, SLOT(OncbUseOnlyXComponents(int)));	
+	
 
 	sampleRate = 48000;
 	duration = 0.02;
@@ -47,8 +48,6 @@ MainWindow::MainWindow(QWidget *parent)
 	ui.edPeriod->setText("0.02");
 	ui.edFileLength->setText("10");	
 
-	//filename = "C:\\git_hub\\aporto\\rabiscoscopio2.svn\\images\\garoa_logo.svg";
-	filename = "C:\\git_hub\\aporto\\rabiscoscopio2.svn\\no_image\\no.svg";
 
 	wave = new QSound("", this);
 	wave->setLoops(QSound::Infinite);
@@ -56,8 +55,12 @@ MainWindow::MainWindow(QWidget *parent)
 	fileMonitor = new QFileSystemWatcher (this);
 	connect(fileMonitor, SIGNAL(fileChanged(QString)), this, SLOT(OnFileChanged(QString)));
 
-	zoom = 1;
+	
 
+	zoom = double(ui.sbZoom->value()) / 100.0;
+
+	ui.progress->setValue(0);
+	ui.progress->show();	
 }
 
 MainWindow::~MainWindow()
@@ -67,12 +70,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::OnLoadFile()	
 {
-	//QString oldFileName = filename;
 	QString newfilename = QFileDialog::getOpenFileName(this,	tr("Open Image"), "", tr("SVG Image Files (*.svg)"));
 	
-	//QString fileName = "C:\\alex\\projetos\\github\\aporto\\rabiscoscopio2\\images\\garoa_logo.svg";
-	//filename = "C:/git_hub/aporto/rabiscoscopio2/images/triangle.svg";
-
 	if (QFileInfo(newfilename).exists() &&  QFileInfo(newfilename).isFile()) {	
 		bool b = fileMonitor->removePath(filename);
 		filename = newfilename;
@@ -782,8 +781,8 @@ void MainWindow::WriteWaveFile()
 	int pTotal = cycles * total;
 	int prog = 0;
 
-	double centerX = 0.5 - double(ui.centerX->value()) / 100.0;
-	double centerY = 0.5 - double(ui.centerY->value()) / 100.0;
+	//double centerX = 0.5; // - double(ui.centerX->value()) / 100.0;
+	//double centerY = 0.5 - double(ui.centerY->value()) / 100.0;
 	for (int j = 0; j < cycles; j++) {
 		for (int i = 0; i < total; i++) {
 			double vy = axis_y.at(i);
@@ -792,8 +791,8 @@ void MainWindow::WriteWaveFile()
 			//sample[0] = (short) (zoom * vy / 50.0 * 32767.0);
 			//sample[1] = (short) (zoom * vx / 50.0 * 32767.0  + 0 * 32767.0);
 
-			sample[0] = (short) (zoom * (vy) * 32767.0) + centerY * 100;
-			sample[1] = (short) (zoom * (vx - centerX) * (32767.0));
+			sample[0] = (short) (zoom * (vy) * 32767.0);
+			sample[1] = (short) (zoom * (vx) * (32767.0));
 			file.write((char *)sample, 4);
 			numSamples ++;
 			dataSize += 4;
@@ -838,4 +837,9 @@ void MainWindow::OnAboutClick()
 	about->setModal(true);
 	about->exec();
 	delete about;
+}
+
+void MainWindow::OncbUseOnlyXComponents(int state)
+{
+	OnRefresh();
 }
