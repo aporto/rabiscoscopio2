@@ -713,6 +713,7 @@ void MainWindow::OnRefresh()
 		duration = 0.02;
 		ui.edPeriod->setText("0.02");		
 	}
+	//QString t = ui.edFileLength->text();
 	fileLength = ui.edFileLength->text().toDouble();
 	if ((fileLength < 0.0001) || (fileLength > 10000)) {
 		fileLength = 10;

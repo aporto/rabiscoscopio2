@@ -71,7 +71,7 @@ private:
 	
 	double sampleRate;
 	double duration;
-	int fileLength;
+	double fileLength;
 	double xCompensate, yCompensate;
 	double zoom;
 
